@@ -75,7 +75,7 @@ pub async fn prover(
     target_url_str: &str,
     val: JsValue,
     secret_headers: JsValue,
-    secret_body: JsValue,
+    public_body: JsValue,
 ) -> Result<String, JsValue> {
     info!("target_url: {}", target_url_str);
     let target_url = Url::parse(target_url_str)
@@ -335,14 +335,12 @@ pub async fn prover(
         secret_headers_slices.as_slice(),
     );
 
-    let secret_body_vecs = string_list_to_bytes_vec(&secret_body)?;
-    let secret_body_slices: Vec<&[u8]> =
-        secret_body_vecs.iter().map(|vec| vec.as_slice()).collect();
-
-    // Identify the ranges in the transcript that contain the only data we want to reveal later
-    let (recv_public_ranges, recv_private_ranges) = find_ranges(
+    let public_body_vecs = string_list_to_bytes_vec(&public_body)?;
+    let public_body_slices: Vec<&[u8]> =
+        public_body_vecs.iter().map(|vec| vec.as_slice()).collect();
+    let (recv_public_ranges, recv_private_ranges) = find_ranges_2(
         prover.recv_transcript().data(),
-        secret_body_slices.as_slice(),
+        public_body_slices.as_slice(),
     );
 
     log_phase(ProverPhases::Commit);
@@ -459,6 +457,35 @@ fn find_ranges(seq: &[u8], private_seq: &[&[u8]]) -> (Vec<Range<usize>>, Vec<Ran
 
     if last_end < seq.len() {
         public_ranges.push(last_end..seq.len());
+    }
+
+    (public_ranges, private_ranges)
+}
+
+fn find_ranges_2(seq: &[u8], public_seq: &[&[u8]]) -> (Vec<Range<usize>>, Vec<Range<usize>>) {
+    let mut public_ranges = Vec::new();
+    for s in public_seq {
+        for (idx, w) in seq.windows(s.len()).enumerate() {
+            if w == *s {
+                public_ranges.push(idx..(idx + w.len()));
+            }
+        }
+    }
+    
+    let mut sorted_ranges = public_ranges.clone();
+    sorted_ranges.sort_by_key(|r| r.start);
+
+    let mut private_ranges = Vec::new();
+    let mut last_end = 0;
+    for r in sorted_ranges {
+        if r.start > last_end {
+            private_ranges.push(last_end..r.start);
+        }
+        last_end = r.end;
+    }
+
+    if last_end < seq.len() {
+        private_ranges.push(last_end..seq.len());
     }
 
     (public_ranges, private_ranges)

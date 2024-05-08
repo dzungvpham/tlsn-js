@@ -17,7 +17,7 @@ import { assert } from '../utils';
         ? 'ws://localhost:55688'
         : 'wss://notary.pse.dev/proxy?token=swapi.dev',
       secretHeaders: ['test_secret'],
-      secretResps: ['blond', 'fair'],
+      publicResps: ['blond', 'fair'],
     });
     console.timeEnd('prove');
 
@@ -31,9 +31,9 @@ import { assert } from '../utils';
 
     assert(result.sent.includes('host: swapi.dev'));
     assert(result.sent.includes('secret: XXXXXXXXXXX'));
-    assert(result.recv.includes('Luke Skywalker'));
-    assert(result.recv.includes('"hair_color":"XXXXX"'));
-    assert(result.recv.includes('"skin_color":"XXXX"'));
+    assert(!result.recv.includes('Luke Skywalker'));
+    assert(result.recv.includes('blond'));
+    assert(result.recv.includes('fair'));
 
     // @ts-ignore
     document.getElementById('full-integration-swapi').textContent = 'OK';

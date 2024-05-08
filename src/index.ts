@@ -22,7 +22,7 @@ export const prove = async (
     maxRecvData?: number;
     maxTranscriptSize?: number;
     secretHeaders?: string[];
-    secretResps?: string[];
+    publicResps?: string[];
   },
 ): Promise<Proof> => {
   const {
@@ -35,7 +35,7 @@ export const prove = async (
     notaryUrl,
     websocketProxyUrl,
     secretHeaders,
-    secretResps,
+    publicResps,
   } = options;
 
   const tlsn = await getTLSN();
@@ -53,7 +53,7 @@ export const prove = async (
     notaryUrl,
     websocketProxyUrl,
     secretHeaders,
-    secretResps,
+    publicResps,
   });
 
   return {

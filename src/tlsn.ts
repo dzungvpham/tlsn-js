@@ -44,7 +44,7 @@ export default class TLSN {
       notaryUrl?: string;
       websocketProxyUrl?: string;
       secretHeaders?: string[];
-      secretResps?: string[];
+      publicResps?: string[];
     },
   ) {
     await this.waitForStart();
@@ -61,7 +61,7 @@ export default class TLSN {
         websocketProxyUrl: options?.websocketProxyUrl,
       },
       options?.secretHeaders || [],
-      options?.secretResps || [],
+      options?.publicResps || [],
     );
     const resJSON = JSON.parse(resProver);
     // console.log('!@# resProver,resJSON=', { resProver, resJSON });
