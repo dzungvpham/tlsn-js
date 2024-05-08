@@ -12,6 +12,7 @@
     "readme.md"
   ],
   "scripts": {
+    "prepare": "npm run build",
     "build:test": "webpack --config webpack.web.dev.config.js",
     "serve:test": "serve  --config ../serve.json ./test-build -l 3001",
     "build:src": "webpack --config webpack.build.config.js",
